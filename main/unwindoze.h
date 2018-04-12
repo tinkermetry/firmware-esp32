@@ -26,7 +26,9 @@
 #define UINT64  uint64_t
 #define INT64   int64_t
 
-#define spektrum_tele_speed_t   STRU_TELE_SPEED
+#define spektrum_tele_speed_t       STRU_TELE_SPEED
+#define spektrum_tele_altitude_t    STRU_TELE_ALT
 
 #define SPEKTRUM_AIRSPEED       TELE_DEVICE_AIRSPEED
+#define SPEKTRUM_ALTITUDE       TELE_DEVICE_ALTITUDE
 #endif

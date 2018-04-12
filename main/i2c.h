@@ -18,29 +18,24 @@
 #define	_I2C_H
 
 #define SPEKTRUM_DATA_LENGTH   16
-#define I2C_SLAVE_SCL          26
-#define I2C_SLAVE_SDA          25
-#define I2C_SLAVE_NUM          I2C_NUM_0
+#define I2C_SLAVE_1_SCL        26 /* yellow */
+#define I2C_SLAVE_1_SDA        25 /* green */
+#define I2C_SLAVE_1_NUM        I2C_NUM_0
+
+#define I2C_SLAVE_2_SCL        19 /* yellow */
+#define I2C_SLAVE_2_SDA        18 /* green */
+#define I2C_SLAVE_2_NUM        I2C_NUM_1
+
 #define I2C_SLAVE_TX_BUF_LEN   (64 * SPEKTRUM_DATA_LENGTH)
 #define I2C_SLAVE_RX_BUF_LEN   (64 * SPEKTRUM_DATA_LENGTH)
-
-#define I2C_MASTER_SCL         19
-#define I2C_MASTER_SDA         18
-// #define I2C_MASTER_SCL         26
-// #define I2C_MASTER_SDA         25
-#define I2C_MASTER_NUM         I2C_NUM_1
-#define I2C_MASTER_TX_BUF_LEN  0
-#define I2C_MASTER_RX_BUF_LEN  0
-#define I2C_MASTER_FREQ_HZ     100000
 
 #define ACK_CHECK_ENABLE       0x1 /* Master will require ack from slave */
 #define ACK_CHECK_DISABLE      0x0
 #define ACK_VAL                0x0
 #define NACK_VAL               0x1
 
-void i2c_slave_init();
-void i2c_master_init();
-void i2c_master_scan();
+void i2c_slave_1_init();
+void i2c_slave_2_init();
 
 #endif
 

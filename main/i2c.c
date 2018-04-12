@@ -21,17 +21,17 @@
 #include "spektrum.h"
 #include "i2c.h"
 
-static const char* TAG = "tinkermetry";
+static const char* TAG = "i2c";
 
-void i2c_slave_init()
+void i2c_slave_1_init()
 {
-    int i2c_slave_port = I2C_SLAVE_NUM;
+    int i2c_slave_port = I2C_SLAVE_1_NUM;
     ESP_LOGD(TAG, "Starting I2C slave at port %d.", i2c_slave_port);
 
     i2c_config_t conf;
-    conf.sda_io_num = I2C_SLAVE_SDA;
+    conf.sda_io_num = I2C_SLAVE_1_SDA;
     conf.sda_pullup_en = GPIO_PULLUP_DISABLE;
-    conf.scl_io_num = I2C_SLAVE_SCL;
+    conf.scl_io_num = I2C_SLAVE_1_SCL;
     conf.scl_pullup_en = GPIO_PULLUP_DISABLE;
     conf.mode = I2C_MODE_SLAVE;
     conf.slave.addr_10bit_en = 0;
@@ -47,25 +47,26 @@ void i2c_slave_init()
     ));
 }
 
-void i2c_master_init()
+void i2c_slave_2_init()
 {
-    int i2c_master_port = I2C_MASTER_NUM;
-    ESP_LOGD(TAG, "Starting I2C master at port %d.", i2c_master_port);
+    int i2c_slave_port = I2C_SLAVE_2_NUM;
+    ESP_LOGD(TAG, "Starting I2C slave at port %d.", i2c_slave_port);
 
     i2c_config_t conf;
-    conf.mode = I2C_MODE_MASTER;
-    conf.sda_io_num = I2C_MASTER_SDA;
-    conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
-    conf.scl_io_num = I2C_MASTER_SCL;
-    conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
-    conf.master.clk_speed = I2C_MASTER_FREQ_HZ;
+    conf.sda_io_num = I2C_SLAVE_2_SDA;
+    conf.sda_pullup_en = GPIO_PULLUP_DISABLE;
+    conf.scl_io_num = I2C_SLAVE_2_SCL;
+    conf.scl_pullup_en = GPIO_PULLUP_DISABLE;
+    conf.mode = I2C_MODE_SLAVE;
+    conf.slave.addr_10bit_en = 0;
+    conf.slave.slave_addr = TELE_DEVICE_ALTITUDE;
 
-    ESP_ERROR_CHECK(i2c_param_config(i2c_master_port, &conf));
+    ESP_ERROR_CHECK(i2c_param_config(i2c_slave_port, &conf));
     ESP_ERROR_CHECK(i2c_driver_install(
-        i2c_master_port,
+        i2c_slave_port,
         conf.mode,
-        I2C_MASTER_RX_BUF_LEN,
-        I2C_MASTER_TX_BUF_LEN,
+        I2C_SLAVE_RX_BUF_LEN,
+        I2C_SLAVE_TX_BUF_LEN,
         0
     ));
 }
