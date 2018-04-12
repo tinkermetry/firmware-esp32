@@ -30,9 +30,9 @@ void i2c_slave_init()
 
     i2c_config_t conf;
     conf.sda_io_num = I2C_SLAVE_SDA;
-    conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
+    conf.sda_pullup_en = GPIO_PULLUP_DISABLE;
     conf.scl_io_num = I2C_SLAVE_SCL;
-    conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
+    conf.scl_pullup_en = GPIO_PULLUP_DISABLE;
     conf.mode = I2C_MODE_SLAVE;
     conf.slave.addr_10bit_en = 0;
     conf.slave.slave_addr = TELE_DEVICE_AIRSPEED;

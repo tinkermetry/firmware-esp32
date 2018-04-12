@@ -21,11 +21,13 @@
 #define I2C_SLAVE_SCL          26
 #define I2C_SLAVE_SDA          25
 #define I2C_SLAVE_NUM          I2C_NUM_0
-#define I2C_SLAVE_TX_BUF_LEN   (8 * SPEKTRUM_DATA_LENGTH)
-#define I2C_SLAVE_RX_BUF_LEN   (8 * SPEKTRUM_DATA_LENGTH)
+#define I2C_SLAVE_TX_BUF_LEN   (64 * SPEKTRUM_DATA_LENGTH)
+#define I2C_SLAVE_RX_BUF_LEN   (64 * SPEKTRUM_DATA_LENGTH)
 
 #define I2C_MASTER_SCL         19
 #define I2C_MASTER_SDA         18
+// #define I2C_MASTER_SCL         26
+// #define I2C_MASTER_SDA         25
 #define I2C_MASTER_NUM         I2C_NUM_1
 #define I2C_MASTER_TX_BUF_LEN  0
 #define I2C_MASTER_RX_BUF_LEN  0

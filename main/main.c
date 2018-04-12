@@ -29,31 +29,41 @@
 #include "spektrum.h"
 #include "i2c.h"
 
-static const char* TAG = "tinkermetry";
+static const char* TAG = "main";
 
 void airspeed_task(void *params)
 {
     spektrum_tele_speed_t airspeed;
     airspeed.identifier = SPEKTRUM_AIRSPEED;
-    airspeed.airspeed =  0x1b; // 27
-    airspeed.maxAirspeed = 0x29; // 41
 
-    /* Spektrum telemetry message is alway 16 bytes even when actual data */
+    /* Spektrum telemetry message is always 16 bytes even when actual data */
     /* size might be smaller. Initialize extra bytes as null. */
-    uint8_t *data_write = (uint8_t*) malloc(SPEKTRUM_DATA_LENGTH);
-    memset(data_write, 0, SPEKTRUM_DATA_LENGTH);
-    memcpy(data_write, &airspeed, sizeof(airspeed));
+    uint8_t buffer[SPEKTRUM_DATA_LENGTH] = { 0 };
+    memcpy(buffer, &airspeed, sizeof(airspeed));
+
+    uint16_t current_speed = 0;
+    uint16_t maximum_speed = 0;
 
     while(1) {
         size_t data_size = i2c_slave_write_buffer(
             I2C_SLAVE_NUM,
-            data_write,
+            buffer,
             SPEKTRUM_DATA_LENGTH,
-            1000 / portTICK_RATE_MS
+            500 / portTICK_RATE_MS
         );
 
-        ESP_LOGD(TAG, "Wrote %d bytes to slave.", data_size);
-        ESP_LOG_BUFFER_HEXDUMP(TAG, (uint8_t *) data_write, SPEKTRUM_DATA_LENGTH, ESP_LOG_DEBUG);
+        /* Stops logging if buffer is full. */
+        if (0 != data_size) {
+            ESP_LOG_BUFFER_HEXDUMP(TAG, (uint8_t *) buffer, data_size, ESP_LOG_DEBUG);
+        }
+
+        current_speed += 1;
+        maximum_speed = 100;
+
+        /* Spektrum expects big-endian / MSB first data. */
+        airspeed.airspeed = (current_speed >> 8) | (current_speed << 8);
+        airspeed.maxAirspeed = (maximum_speed >> 8) | (maximum_speed << 8);
+        memcpy(buffer, &airspeed, sizeof(airspeed));
 
         vTaskDelay(1000 / portTICK_RATE_MS);
     }
@@ -63,9 +73,10 @@ void airspeed_task(void *params)
 
 void i2c_read_task(void *params)
 {
-    uint8_t *data_read = (uint8_t *) malloc(SPEKTRUM_DATA_LENGTH);
+    uint8_t buffer[SPEKTRUM_DATA_LENGTH] = { 0 };
+
     ESP_LOGD(TAG, "Allocated %d bytes for reading.", SPEKTRUM_DATA_LENGTH);
-    ESP_LOG_BUFFER_HEXDUMP(TAG, data_read, SPEKTRUM_DATA_LENGTH, ESP_LOG_DEBUG);
+    ESP_LOG_BUFFER_HEXDUMP(TAG, buffer, SPEKTRUM_DATA_LENGTH, ESP_LOG_DEBUG);
 
     while(1) {
         ESP_LOGD(TAG, "Reading from I2C slave.");
@@ -80,18 +91,18 @@ void i2c_read_task(void *params)
         );
         if (SPEKTRUM_DATA_LENGTH > 1) {
             ESP_ERROR_CHECK(
-                i2c_master_read(cmd, data_read, SPEKTRUM_DATA_LENGTH - 1, ACK_VAL)
+                i2c_master_read(cmd, buffer, SPEKTRUM_DATA_LENGTH - 1, ACK_VAL)
             );
         }
         ESP_ERROR_CHECK(
-            i2c_master_read_byte(cmd, data_read + SPEKTRUM_DATA_LENGTH - 1, NACK_VAL)
+            i2c_master_read_byte(cmd, buffer + SPEKTRUM_DATA_LENGTH - 1, NACK_VAL)
         );
         ESP_ERROR_CHECK(i2c_master_stop(cmd));
         ESP_ERROR_CHECK(
             i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS)
         );
         i2c_cmd_link_delete(cmd);
-        ESP_LOG_BUFFER_HEXDUMP(TAG, data_read, SPEKTRUM_DATA_LENGTH, ESP_LOG_DEBUG);
+        ESP_LOG_BUFFER_HEXDUMP(TAG, buffer, SPEKTRUM_DATA_LENGTH, ESP_LOG_DEBUG);
 
         vTaskDelay(1000 / portTICK_RATE_MS);
     }
@@ -103,11 +114,9 @@ void i2c_read_task(void *params)
 void app_main()
 {
     i2c_slave_init();
-    i2c_master_init();
-    i2c_master_scan();
+    // i2c_master_init();
+    // i2c_master_scan();
 
     xTaskCreatePinnedToCore(airspeed_task, "Airspeed", 2048, NULL, 1, NULL, 1);
-    xTaskCreatePinnedToCore(i2c_read_task, "I2C read", 2048, NULL, 1, NULL, 1);
-
-    while(1);
+//    xTaskCreatePinnedToCore(i2c_read_task, "I2C read", 2048, NULL, 1, NULL, 1);
 }
