@@ -21,12 +21,10 @@
 #include <esp_log.h>
 #include <driver/i2c.h>
 
-//#include <freertos/FreeRTOS.h>
-//#include <freertos/task.h>
-
 #include "sdkconfig.h"
 #include "unwindoze.h"
 #include "spektrum.h"
+#include "byteswap.h"
 #include "i2c.h"
 
 static const char* TAG = "main";
@@ -61,8 +59,8 @@ void airspeed_task(void *params)
         maximum_speed = 100;
 
         /* Spektrum expects big-endian / MSB first data. */
-        airspeed.airspeed = (current_speed >> 8) | (current_speed << 8);
-        airspeed.maxAirspeed = (maximum_speed >> 8) | (maximum_speed << 8);
+        airspeed.airspeed = bswap_16(current_speed);
+        airspeed.maxAirspeed =  bswap_16(maximum_speed);
         memcpy(buffer, &airspeed, sizeof(airspeed));
 
         vTaskDelay(500 / portTICK_RATE_MS);
@@ -101,8 +99,8 @@ void altitude_task(void *params)
         maximum_altitude = 120;
 
         /* Spektrum expects big-endian / MSB first data. */
-        altitude.altitude = (current_altitude >> 8) | (current_altitude << 8);
-        altitude.maxAltitude = (maximum_altitude >> 8) | (maximum_altitude << 8);
+        altitude.altitude = bswap_16(current_altitude);
+        altitude.maxAltitude = bswap_16(maximum_altitude);
         memcpy(buffer, &altitude, sizeof(altitude));
 
         vTaskDelay(1000 / portTICK_RATE_MS);
@@ -111,7 +109,6 @@ void altitude_task(void *params)
     vTaskDelete(NULL);
 }
 
-/* ESP32 application entry point */
 void app_main()
 {
     i2c_slave_1_init();
