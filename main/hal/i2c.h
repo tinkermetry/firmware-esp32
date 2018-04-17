@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Mika Tuupola
+ * Copyright (c) 2017-2018 Mika Tuupola
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-#ifndef _UNWINDOZE_H
-#define	_UNWINDOZE_H
+#ifndef _TINKERMETRY_HAL_I2C_H
+#define	_TINKERMETRY_HAL_I2C_H
 
-#define UINT8   uint8_t
-#define INT8    int8_t
-#define UINT16  uint16_t
-#define INT16   int16_t
-#define UINT32  uint32_t
-#define INT32   int32_t
-#define UINT64  uint64_t
-#define INT64   int64_t
+typedef struct {
+    uint8_t port; /* This might need to change to number. */
+    uint8_t address;
+    uint8_t scl_io_number;
+    uint8_t sda_io_number;
+} hal_i2c_slave_config_t;
 
-#define spektrum_tele_speed_t       STRU_TELE_SPEED
-#define spektrum_tele_altitude_t    STRU_TELE_ALT
+void hal_i2c_slave_init(const hal_i2c_slave_config_t *i2c_slave_config);
+uint16_t hal_i2c_slave_write(uint8_t port, uint8_t *data, uint16_t size);
 
-#define SPEKTRUM_DATA_LENGTH    16
-#define SPEKTRUM_AIRSPEED       TELE_DEVICE_AIRSPEED
-#define SPEKTRUM_ALTITUDE       TELE_DEVICE_ALTITUDE
 #endif

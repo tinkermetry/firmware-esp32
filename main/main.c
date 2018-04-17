@@ -25,7 +25,13 @@
 #include "unwindoze.h"
 #include "spektrum.h"
 #include "byteswap.h"
-#include "i2c.h"
+#include "hal/i2c.h"
+#include "hal/i2c_esp32.h"     /* This should be conditional. */
+
+#define I2C_SLAVE_0_SCL        19 /* yellow */
+#define I2C_SLAVE_0_SDA        18 /* white!! green */
+#define I2C_SLAVE_1_SCL        26 /* yellow */
+#define I2C_SLAVE_1_SDA        25 /* white!! green */
 
 static const char* TAG = "main";
 
@@ -43,11 +49,10 @@ void airspeed_task(void *params)
     uint16_t maximum_speed = 0;
 
     while(1) {
-        size_t data_size = i2c_slave_write_buffer(
-            I2C_SLAVE_1_NUM,
+        size_t data_size = hal_i2c_slave_write(
+            I2C_SLAVE_0_PORT,
             buffer,
-            SPEKTRUM_DATA_LENGTH,
-            500 / portTICK_RATE_MS
+            SPEKTRUM_DATA_LENGTH
         );
 
         /* Stops logging if buffer is full. */
@@ -83,11 +88,10 @@ void altitude_task(void *params)
     uint16_t maximum_altitude = 0;
 
     while(1) {
-        size_t data_size = i2c_slave_write_buffer(
-            I2C_SLAVE_2_NUM,
+        size_t data_size = hal_i2c_slave_write(
+            I2C_SLAVE_1_PORT,
             buffer,
-            SPEKTRUM_DATA_LENGTH,
-            1000 / portTICK_RATE_MS
+            SPEKTRUM_DATA_LENGTH
         );
 
         /* Stops logging if buffer is full. */
@@ -111,8 +115,21 @@ void altitude_task(void *params)
 
 void app_main()
 {
-    i2c_slave_1_init();
-    i2c_slave_2_init();
+    hal_i2c_slave_config_t i2c_config_0;
+    hal_i2c_slave_config_t i2c_config_1;
+
+    i2c_config_0.port = I2C_SLAVE_0_PORT;
+    i2c_config_0.address = SPEKTRUM_AIRSPEED;
+    i2c_config_0.scl_io_number = I2C_SLAVE_0_SCL;
+    i2c_config_0.sda_io_number = I2C_SLAVE_0_SDA;
+
+    i2c_config_1.port = I2C_SLAVE_1_PORT;
+    i2c_config_1.address = SPEKTRUM_ALTITUDE;
+    i2c_config_1.scl_io_number = I2C_SLAVE_1_SCL;
+    i2c_config_1.sda_io_number = I2C_SLAVE_1_SDA;
+
+    hal_i2c_slave_init(&i2c_config_0);
+    hal_i2c_slave_init(&i2c_config_1);
 
     xTaskCreatePinnedToCore(airspeed_task, "Airspeed", 2048, NULL, 1, NULL, 1);
     xTaskCreatePinnedToCore(altitude_task, "Altitude", 2048, NULL, 1, NULL, 1);
