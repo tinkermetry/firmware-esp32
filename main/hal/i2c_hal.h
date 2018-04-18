@@ -18,13 +18,24 @@
 #define	_TINKERMETRY_HAL_I2C_H
 
 typedef struct {
-    uint8_t port; /* This might need to change to number. */
+    uint8_t number;
     uint8_t address;
     uint8_t scl_io_number;
     uint8_t sda_io_number;
 } hal_i2c_slave_config_t;
 
+typedef struct {
+    uint8_t number;
+    uint8_t scl_io_number;
+    uint8_t sda_io_number;
+} hal_i2c_master_config_t;
+
 void hal_i2c_slave_init(const hal_i2c_slave_config_t *i2c_slave_config);
-uint16_t hal_i2c_slave_write(uint8_t port, uint8_t *data, uint16_t size);
+void hal_i2c_master_init(const hal_i2c_master_config_t *i2c_master_config);
+
+uint8_t hal_i2c_slave_write(uint8_t number, uint8_t *buffer, uint16_t length);
+uint8_t hal_i2c_master_probe(uint8_t number, uint8_t address);
+uint8_t hal_i2c_master_write(uint8_t number, uint8_t address, uint8_t *buffer, uint16_t length);
+uint8_t hal_i2c_master_read(uint8_t number, uint8_t address, uint8_t *buffer, uint16_t length);
 
 #endif

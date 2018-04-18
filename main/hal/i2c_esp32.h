@@ -19,8 +19,8 @@
 
 #define I2C_SLAVE_TX_BUF_LEN   (8 * SPEKTRUM_DATA_LENGTH)
 #define I2C_SLAVE_RX_BUF_LEN   (8 * SPEKTRUM_DATA_LENGTH)
-#define I2C_SLAVE_0_PORT       I2C_NUM_0
-#define I2C_SLAVE_1_PORT       I2C_NUM_1
+#define I2C_DEVICE_NUMBER_0    I2C_NUM_0
+#define I2C_DEVICE_NUMBER_1    I2C_NUM_1
 
 #define I2C_ACK_CHECK_ENABLE   0x1 /* Master will require ack from slave */
 #define I2C_ACK_CHECK_DISABLE  0x0
@@ -28,7 +28,7 @@
 #define I2C_NACK_VALUE         0x1
 
 void hal_esp32_i2c_slave_init(const hal_i2c_slave_config_t* i2c_slave_config);
-uint16_t hal_esp32_i2c_slave_write(uint8_t port, uint8_t *data, uint16_t size);
+uint8_t hal_esp32_i2c_slave_write(uint8_t port, uint8_t *data, uint16_t size);
 
 #endif
 
